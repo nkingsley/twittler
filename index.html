@@ -9,33 +9,86 @@
   #homeStreamHolder{
     padding:1%;
     float:left;
-    width:47%;
+    width:50%;
+    height:600px;
+    overflow-y:scroll;
+    background: rgb(100,150,150);
     border:1px solid;
-    border-radius:20px;
+    border-color: rgb(90,140,140);
+    border-radius: 5px;
+  }
+  #rightholder{
+    float:right;
+    width:47%;
+  }
+  .tweetBox{
+    margin-bottom:5px;
+    border:1px solid;
+    padding:5px;
+    border-radius:3px;
+    border-color: rgb(250,250,250);
+    background:rgb(300,300,300);
+  }
+  .tweetTime{
+    font-size:10px;
+    font-weight:900;
   }
   #sidebarHolder{
+    border-radius:5px;
+    height:300px;
+    overflow-y:scroll;
     padding:1%;
-    float:right;
-    background:blue;
-    width:47%;
+    background:rgb(150,150,100);
     border:1px solid;
-    border-radius:20px;
+    border-color:rgb(140,140,90);
     display:none;
+  }
+  #writeTweetsHolder{
+    height:300px;
+    overflow-y:scroll;
+    padding:1%;
+    background:rgb(150,100,150);
+    border-radius:5px;
+    border:1px solid;
+    border-color:rgb(140,90,140);
   }
   </style>
   <body>
-    <div id = "sidebarHolder"></div>
-    <div id = "homeStreamHolder">ALL TWITTLES:<div id = "homeStreams"></div></div>
+    <div id = "rightholder">
+      <div id = "sidebarHolder"></div>
+      <div id = "writeTweetsHolder">
+        <input type = "text" id = "twText"/>
+        <input id = "twSubmit" type = "submit" value = "twittle" />
+        <div id = "myTweets"> </div>
+      </div>
+    </div>
+    <div id = "homeStreamHolder">All Twittles:
+      <div id = "homeStreams"></div>
+    </div>
     <script>
+      var visitor = prompt("What's your twittler handle?");
+      streams.users[visitor] = [];
       var resetUserInterval = '';
       var scope = streams.home;
       var currTweet = 0;
       var currUserTweet = 0;
+      var currMyTweet = 0;
       $(document).ready(function(){
+        $("#twText").keyup(function(event){
+          if(event.keyCode == 13){
+           $("#twSubmit").click();
+          }
+        });
+        $(document).on('click','#twSubmit', function(){
+          var msg = $('#twText').val().toString();
+          writeTweet(msg);
+          $('#twText').val('');
+          currMyTweet = tweetUpdate(streams.users[visitor],currMyTweet,'#myTweets');
+        });
         currTweet = tweetUpdate(scope,0,'#homeStreams');
         setInterval(function(){
           currTweet = tweetUpdate(scope,currTweet,'#homeStreams');
-        }, 3000);
+        }, 7000);
         $(document).on('click', '.userLink', function(){
           var user = this.text.slice(1);
           $('#sidebarHolder').html(user + "'s Twittles: <div id = 'sidebar'></div>");
@@ -44,7 +97,7 @@
           currUserTweet = tweetUpdate(user,0,'#sidebar');
           resetUserInterval = setInterval(function(){
           currUserTweet = tweetUpdate(user,currUserTweet,'#sidebar');
-        }, 3000);
+        }, 7000);
           $('#sidebarHolder').fadeIn('fast');
           return false;
       });
@@ -52,16 +105,16 @@
     function showTweet(index,scope,layout){
       var tweet = scope[index];
       var $tweet = $('<div></div>');
-      $tweet.html('<abbr class="timeago" title="' + tweet.created_at.toISOString() + '">' + tweet.created_at + '</abbr><a class = "userLink" href = "#">@' + tweet.user + '</a>: ' + tweet.message);
+      $tweet.html('<div class = "tweetBox"><div class = "tweetTime"><abbr class="timeago" title="' + tweet.created_at.toISOString() + '">' + tweet.created_at + '</abbr></div><a class = "userLink" href = "#">@' + tweet.user + '</a>: ' + tweet.message + '</div>');
       $tweet.prependTo($(layout));
       jQuery("abbr.timeago").timeago();
     }
-    function tweetUpdate(scope,currTweet,layout){
-      var toAdd = (scope.length - 1) - currTweet;
-      for (var i=1 ; i < toAdd ; i++){
-        showTweet(currTweet + i, scope,layout);
+    function tweetUpdate(scope,startAt,layout){
+      var toAdd = (scope.length ) - startAt;
+      for (var i=0 ; i < toAdd ; i++){
+        showTweet(startAt + i, scope,layout);
       }
-      return currTweet + i;
+      return startAt + i;
     }
     </script>
   </body>
